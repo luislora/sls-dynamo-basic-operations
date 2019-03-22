@@ -1,0 +1,47 @@
+service: sls-dynamo-basic-operations
+
+custom:
+  settings:
+    ITEMS_DYNAMODB_TABLE: my_table
+
+provider:
+  name: aws
+  runtime: nodejs8.10
+  environment: ${self:custom.settings}
+  region: us-west-2
+
+  iamRoleStatements:
+  - Effect: "Allow"
+    Action:
+      - "dynamodb:GetItem"
+      - "dynamodb:PutItem"
+      - "dynamodb:UpdateItem"
+      - "dynamodb:DeleteItem"
+    Resource:
+      - "arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.settings.ITEMS_DYNAMODB_TABLE}"
+
+functions:
+  saveItem:
+    handler: handler.saveItem
+    events:
+      - http:
+          path: item
+          method: post
+  getItem:
+    handler: handler.getItem
+    events:
+      - http:
+          path: item/{itemId}
+          method: get
+  deleteItem:
+    handler: handler.deleteItem
+    events:
+      - http:
+          path: item/{itemId}
+          method: delete
+  updateItem:
+    handler: handler.updateItem
+    events:
+      - http:
+          path: item/{itemId}
+          method: put
